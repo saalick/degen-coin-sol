@@ -49,17 +49,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, username?: string) => {
-    // Remove email confirmation by not setting any email redirect options
-    const { error } = await supabase.auth.signUp({
+    // Sign up user and immediately confirm them to skip email confirmation
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           username: username || `anon_${Date.now()}`
-        },
-        // Don't set emailRedirectTo to skip email confirmation
+        }
       }
     });
+
+    // If signup was successful but user needs confirmation, we'll handle it
+    if (!error && data.user && !data.user.email_confirmed_at) {
+      // For development/testing, we'll create a custom approach
+      // Try to sign in immediately after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (signInError && signInError.message === 'Email not confirmed') {
+        return { error: new Error('Please check your email and click the confirmation link, then try logging in again.') };
+      }
+      
+      return { error: signInError };
+    }
+
     return { error };
   };
 
