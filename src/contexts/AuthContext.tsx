@@ -49,14 +49,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, username?: string) => {
-    // Remove email confirmation by not setting emailRedirectTo
+    // Remove email confirmation by not setting any email redirect options
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           username: username || `anon_${Date.now()}`
-        }
+        },
+        // Don't set emailRedirectTo to skip email confirmation
       }
     });
     return { error };
