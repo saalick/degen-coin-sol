@@ -11,10 +11,10 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [walletAddress, setWalletAddress] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [useWallet, setUseWallet] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(false);
   
   const { signIn, signUp, signInWithWallet, user } = useAuth();
   const navigate = useNavigate();
@@ -31,32 +31,62 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      if (useWallet) {
-        if (!walletAddress) {
-          setError('Please enter a wallet address');
-          return;
-        }
-        const { error } = await signInWithWallet(walletAddress);
+      if (isLogin) {
+        const { error } = await signIn(email, password);
         if (error) {
           setError(error.message);
         }
       } else {
-        if (isLogin) {
-          const { error } = await signIn(email, password);
-          if (error) {
-            setError(error.message);
-          }
-        } else {
-          const { error } = await signUp(email, password, username);
-          if (error) {
-            setError(error.message);
-          }
+        const { error } = await signUp(email, password, username);
+        if (error) {
+          setError(error.message);
         }
       }
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWalletConnect = async () => {
+    setError('');
+    setWalletLoading(true);
+
+    try {
+      // Check if MetaMask is installed
+      if (typeof window.ethereum === 'undefined') {
+        setError('Please install MetaMask or another Web3 wallet to continue');
+        return;
+      }
+
+      // Request account access
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+
+      if (accounts.length === 0) {
+        setError('No wallet accounts found. Please unlock your wallet.');
+        return;
+      }
+
+      const walletAddress = accounts[0];
+      console.log('Connected wallet address:', walletAddress);
+
+      // Sign in with the wallet address
+      const { error } = await signInWithWallet(walletAddress);
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err: any) {
+      console.error('Wallet connection error:', err);
+      if (err.code === 4001) {
+        setError('Wallet connection was rejected by user');
+      } else {
+        setError('Failed to connect wallet: ' + err.message);
+      }
+    } finally {
+      setWalletLoading(false);
     }
   };
 
@@ -91,86 +121,84 @@ const AuthPage = () => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {useWallet ? (
+        {useWallet ? (
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-gray-400 terminal-text mb-4">
+                {'>'} Connect your Web3 wallet to authenticate
+              </p>
+              <Button
+                onClick={handleWalletConnect}
+                disabled={walletLoading}
+                className="terminal-button w-full"
+              >
+                {walletLoading ? 'Connecting...' : 'CONNECT WALLET'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div>
+                <Label htmlFor="username" className="terminal-text text-gray-300">
+                  Username (optional)
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="terminal-input"
+                  placeholder="anon_degen"
+                />
+              </div>
+            )}
+            
             <div>
-              <Label htmlFor="wallet" className="terminal-text text-gray-300">
-                Wallet Address
+              <Label htmlFor="email" className="terminal-text text-gray-300">
+                Email
               </Label>
               <Input
-                id="wallet"
-                type="text"
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="terminal-input"
-                placeholder="0x..."
+                placeholder="your@email.com"
                 required
               />
             </div>
-          ) : (
-            <>
-              {!isLogin && (
-                <div>
-                  <Label htmlFor="username" className="terminal-text text-gray-300">
-                    Username (optional)
-                  </Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="terminal-input"
-                    placeholder="anon_degen"
-                  />
-                </div>
-              )}
-              
-              <div>
-                <Label htmlFor="email" className="terminal-text text-gray-300">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="terminal-input"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
 
-              <div>
-                <Label htmlFor="password" className="terminal-text text-gray-300">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="terminal-input"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </>
-          )}
-
-          {error && (
-            <div className="terminal-text text-red-400 text-sm">
-              {'>'} {error}
+            <div>
+              <Label htmlFor="password" className="terminal-text text-gray-300">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="terminal-input"
+                placeholder="••••••••"
+                required
+              />
             </div>
-          )}
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="terminal-button w-full"
-          >
-            {loading ? 'Processing...' : (useWallet ? 'CONNECT WALLET' : (isLogin ? 'LOGIN' : 'SIGN UP'))}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="terminal-button w-full"
+            >
+              {loading ? 'Processing...' : (isLogin ? 'LOGIN' : 'SIGN UP')}
+            </Button>
+          </form>
+        )}
+
+        {error && (
+          <div className="terminal-text text-red-400 text-sm mt-4">
+            {'>'} {error}
+          </div>
+        )}
 
         {!useWallet && (
           <div className="mt-6 text-center">
