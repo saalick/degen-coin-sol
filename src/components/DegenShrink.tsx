@@ -1,5 +1,7 @@
 
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Message {
   text: string;
@@ -10,13 +12,15 @@ interface Message {
 const DegenShrink = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      text: "DegenShrink v1.0 initialized. I understand your portfolio pain. What's eating you?",
+      text: "DegenShrink v2.0 initialized with real AI. I understand your portfolio pain. What's eating you?",
       isUser: false,
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [mode, setMode] = useState('brutally_honest');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const modes = [
     { id: 'brutally_honest', label: 'Brutally Honest' },
@@ -25,8 +29,8 @@ const DegenShrink = () => {
     { id: 'fomo_detox', label: 'FOMO Detox' }
   ];
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
     const userMessage: Message = {
       text: inputValue,
@@ -35,44 +39,50 @@ const DegenShrink = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputValue;
     setInputValue('');
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = {
-        brutally_honest: [
-          "Listen anon, that 90% portfolio drawdown isn't a bug, it's a feature of this space. You're still here, which means you're tougher than you think.",
-          "Your dopamine receptors are fried from chart watching. Time to touch grass and reset your reward system.",
-          "Stop checking your bags every 5 minutes. The market doesn't care about your feelings or your rent money."
-        ],
-        cope_mode: [
-          "We're all gonna make it, anon. This is just temporary. The best traders are forged in bear markets.",
-          "Remember: every rug you survive makes you stronger. You're building anti-fragility.",
-          "The market is testing your diamond hands. Don't let it win."
-        ],
-        gm_therapy: [
-          "GM anon. Today is a new day with new opportunities. Your past trades don't define your future.",
-          "Take a moment to appreciate what you've learned. Every loss taught you something valuable.",
-          "The sun rises on both winners and losers. What matters is how you show up today."
-        ],
-        fomo_detox: [
-          "That 1000x token everyone's shilling? It's probably going to zero. Your FOMO is not alpha.",
-          "Real wealth is built slowly. Stop chasing every pump or you'll stay poor forever.",
-          "The best trade you can make right now might be no trade at all."
-        ]
-      };
+    try {
+      console.log('Sending message to DegenShrink AI:', { message: currentMessage, mode });
+      
+      const { data, error } = await supabase.functions.invoke('degen-shrink-ai', {
+        body: { message: currentMessage, mode }
+      });
 
-      const modeResponses = responses[mode as keyof typeof responses] || responses.brutally_honest;
-      const randomResponse = modeResponses[Math.floor(Math.random() * modeResponses.length)];
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      console.log('AI response received:', data);
 
       const aiMessage: Message = {
-        text: randomResponse,
+        text: data.response || "Something went wrong with my neural networks. Try again?",
         isUser: false,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, aiMessage]);
-    }, 1000 + Math.random() * 2000);
+    } catch (error: any) {
+      console.error('Error getting AI response:', error);
+      
+      const errorMessage: Message = {
+        text: "My AI brain is temporarily fried. The markets have me stressed too. Try again in a moment.",
+        isUser: false,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "AI Error",
+        description: "DegenShrink is having technical difficulties. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -80,7 +90,7 @@ const DegenShrink = () => {
       <div className="max-w-4xl mx-auto">
         <div className="terminal-border p-6 h-[600px] flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="terminal-text text-2xl">DegenShrink Terminal</h2>
+            <h2 className="terminal-text text-2xl">DegenShrink Terminal v2.0</h2>
             <select 
               value={mode}
               onChange={(e) => setMode(e.target.value)}
@@ -105,6 +115,16 @@ const DegenShrink = () => {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="terminal-text">
+                <div className="text-gray-400 text-xs mb-1">
+                  [{new Date().toLocaleTimeString()}] DegenShrink:
+                </div>
+                <div className="text-white">
+                  {'>'} <span className="animate-pulse">Processing your degeneracy...</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex space-x-2">
@@ -115,12 +135,14 @@ const DegenShrink = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               className="terminal-input flex-1"
               placeholder="Tell me what's really bothering you..."
+              disabled={isLoading}
             />
             <button 
               onClick={handleSendMessage}
               className="terminal-button px-6"
+              disabled={isLoading || !inputValue.trim()}
             >
-              SEND
+              {isLoading ? 'PROCESSING...' : 'SEND'}
             </button>
           </div>
         </div>
