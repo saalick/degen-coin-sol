@@ -17,9 +17,13 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-600 px-6 py-4">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
-        <div className="terminal-text text-xl font-bold">
-          <span className="text-gray-400">{'>'}</span> DegenTerminal
-        </div>
+        <Link to="/" className="flex items-center">
+          <img 
+            src="https://i.ibb.co/qLS81x2z/EED5-D5-FC-5-BC8-4-E42-85-B8-1-ADE6-CA97682-2.jpg" 
+            alt="DegenTerminal Logo" 
+            className="h-8 w-auto"
+          />
+        </Link>
         
         <div className="flex space-x-6">
           {navItems.map((item) => (
