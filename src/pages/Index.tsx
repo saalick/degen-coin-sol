@@ -1,8 +1,8 @@
-
 import Navigation from '../components/Navigation';
 import TerminalHero from '../components/TerminalHero';
 import SocialLinks from '../components/SocialLinks';
 import FounderBio from '../components/FounderBio';
+import CoinDescription from '../components/CoinDescription';
 
 const Index = () => {
   return (
@@ -18,6 +18,10 @@ const Index = () => {
         </div>
       </div>
       
+      <section className="p-6">
+        <CoinDescription />
+      </section>
+
       <section className="p-6">
         <div className="max-w-4xl mx-auto">
           <div className="terminal-border p-8 mb-12">
