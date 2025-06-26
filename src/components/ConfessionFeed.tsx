@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,7 @@ const ConfessionFeed = () => {
   const fetchConfessions = async () => {
     setLoading(true);
     try {
+      // Fetch confessions with reaction counts
       const { data, error } = await supabase
         .from('confessions')
         .select(`
@@ -39,16 +41,31 @@ const ConfessionFeed = () => {
 
       if (error) throw error;
 
-      // Properly type and transform the reactions data
-      const transformedData = data?.map(confession => ({
-        ...confession,
-        reactions: typeof confession.reactions === 'object' && confession.reactions !== null
-          ? confession.reactions as { cope: number; same: number; gm: number }
-          : { cope: 0, same: 0, gm: 0 }
-      })) || [];
+      // For each confession, get the actual reaction counts from confession_reactions table
+      const confessionsWithCounts = await Promise.all(
+        (data || []).map(async (confession) => {
+          const { data: reactionCounts } = await supabase
+            .from('confession_reactions')
+            .select('reaction_type')
+            .eq('confession_id', confession.id);
 
-      setConfessions(transformedData);
+          const counts = { cope: 0, same: 0, gm: 0 };
+          reactionCounts?.forEach((reaction) => {
+            if (reaction.reaction_type in counts) {
+              counts[reaction.reaction_type as keyof typeof counts]++;
+            }
+          });
+
+          return {
+            ...confession,
+            reactions: counts
+          };
+        })
+      );
+
+      setConfessions(confessionsWithCounts);
     } catch (error: any) {
+      console.error('Error fetching confessions:', error);
       toast({
         title: "Error loading confessions",
         description: error.message,
@@ -92,6 +109,7 @@ const ConfessionFeed = () => {
       });
       fetchConfessions();
     } catch (error: any) {
+      console.error('Error submitting confession:', error);
       toast({
         title: "Error submitting confession",
         description: error.message,
@@ -113,6 +131,8 @@ const ConfessionFeed = () => {
     }
 
     try {
+      console.log(`Handling reaction: ${reactionType} for confession: ${confessionId}`);
+      
       // Check if user already reacted with this type
       const { data: existingReaction } = await supabase
         .from('confession_reactions')
@@ -124,23 +144,41 @@ const ConfessionFeed = () => {
 
       if (existingReaction) {
         // Remove reaction
-        await supabase
+        console.log('Removing existing reaction');
+        const { error } = await supabase
           .from('confession_reactions')
           .delete()
           .eq('id', existingReaction.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Reaction removed",
+          description: `Removed your /${reactionType} reaction`
+        });
       } else {
         // Add reaction
-        await supabase
+        console.log('Adding new reaction');
+        const { error } = await supabase
           .from('confession_reactions')
           .insert({
             confession_id: confessionId,
             user_id: user.id,
             reaction_type: reactionType
           });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Reaction added",
+          description: `Added /${reactionType} reaction`
+        });
       }
 
+      // Refresh confessions to update counts
       fetchConfessions();
     } catch (error: any) {
+      console.error('Error updating reaction:', error);
       toast({
         title: "Error updating reaction",
         description: error.message,
@@ -160,14 +198,14 @@ const ConfessionFeed = () => {
 
   if (!user) {
     return (
-      <section className="min-h-screen bg-black p-6 pt-24">
+      <section className="min-h-screen bg-black p-4 sm:p-6 pt-20 sm:pt-24">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="terminal-border p-8">
-            <h2 className="terminal-text text-2xl mb-4">Access Denied</h2>
-            <p className="text-gray-400 terminal-text mb-6">
+          <div className="terminal-border p-6 sm:p-8">
+            <h2 className="terminal-text text-xl sm:text-2xl mb-4">Access Denied</h2>
+            <p className="text-gray-400 terminal-text mb-4 sm:mb-6 text-sm sm:text-base">
               {'>'} You need to be authenticated to view confessions
             </p>
-            <Link to="/auth" className="terminal-button inline-block px-6 py-3">
+            <Link to="/auth" className="terminal-button inline-block px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base">
               /login
             </Link>
           </div>
@@ -177,69 +215,69 @@ const ConfessionFeed = () => {
   }
 
   return (
-    <section className="min-h-screen bg-black p-6 pt-24">
+    <section className="min-h-screen bg-black p-4 sm:p-6 pt-20 sm:pt-24">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h2 className="terminal-text text-3xl mb-4">Anonymous Confessions</h2>
-          <p className="text-gray-400 terminal-text">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="terminal-text text-2xl sm:text-3xl mb-3 sm:mb-4">Anonymous Confessions</h2>
+          <p className="text-gray-400 terminal-text text-sm sm:text-base">
             {'>'} Raw degen stories. No judgment zone. Type /anon to stay hidden.
           </p>
         </div>
 
-        <div className="terminal-border p-6 mb-8">
-          <div className="terminal-text text-lg mb-4">Submit Anonymous Confession:</div>
+        <div className="terminal-border p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="terminal-text text-base sm:text-lg mb-3 sm:mb-4">Submit Anonymous Confession:</div>
           <textarea
             value={newConfession}
             onChange={(e) => setNewConfession(e.target.value)}
-            className="terminal-input w-full h-32 resize-none mb-4"
+            className="terminal-input w-full h-24 sm:h-32 resize-none mb-3 sm:mb-4 text-sm sm:text-base"
             placeholder="Tell your truth... hash will be generated for anonymity"
           />
           <button 
             onClick={handleSubmitConfession}
             disabled={submitting}
-            className="terminal-button"
+            className="terminal-button text-sm sm:text-base px-4 sm:px-6 py-2"
           >
             {submitting ? 'Submitting...' : '/submit_anon'}
           </button>
         </div>
 
         {loading ? (
-          <div className="text-center terminal-text text-gray-400">
+          <div className="text-center terminal-text text-gray-400 text-sm sm:text-base">
             Loading confessions...
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {confessions.map((confession, index) => (
-              <div key={confession.id} className="terminal-border p-6 hover:bg-gray-900 transition-colors">
-                <div className="terminal-text mb-2">
+              <div key={confession.id} className="terminal-border p-4 sm:p-6 hover:bg-gray-900 transition-colors">
+                <div className="terminal-text mb-2 text-sm sm:text-base">
                   <span className="text-gray-400">anon#{String(index + 1).padStart(6, '0')}:</span>
                 </div>
                 
-                <div className="terminal-text text-gray-300 mb-4 leading-relaxed">
+                <div className="terminal-text text-gray-300 mb-3 sm:mb-4 leading-relaxed text-sm sm:text-base">
                   {'>'} {confession.content}
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <div className="text-gray-500 text-sm terminal-text">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                  <div className="text-gray-500 text-xs sm:text-sm terminal-text">
                     {formatTimeAgo(confession.created_at)}
                   </div>
                   
-                  <div className="flex space-x-4">
+                  <div className="flex flex-wrap gap-2 sm:gap-4">
                     <button 
                       onClick={() => handleReaction(confession.id, 'cope')}
-                      className="terminal-text text-gray-400 hover:text-white transition-colors"
+                      className="terminal-text text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
                     >
                       /cope ({confession.reactions.cope})
                     </button>
                     <button 
                       onClick={() => handleReaction(confession.id, 'same')}
-                      className="terminal-text text-gray-400 hover:text-white transition-colors"
+                      className="terminal-text text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
                     >
                       /same ({confession.reactions.same})
                     </button>
                     <button 
                       onClick={() => handleReaction(confession.id, 'gm')}
-                      className="terminal-text text-gray-400 hover:text-white transition-colors"
+                      className="terminal-text text-gray-400 hover:text-white transition-colors text-xs sm:text-sm"
                     >
                       /gm ({confession.reactions.gm})
                     </button>
