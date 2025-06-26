@@ -16,14 +16,14 @@ const Index = () => {
       <TerminalHero />
       
       {!user && (
-        <section className="py-16 px-6">
+        <section className="py-12 sm:py-16 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="terminal-border p-8 mb-8">
-              <h2 className="terminal-text text-2xl mb-4">Join the Terminal</h2>
-              <p className="text-gray-400 terminal-text mb-6">
+            <div className="terminal-border p-6 sm:p-8 mb-6 sm:mb-8">
+              <h2 className="terminal-text text-xl sm:text-2xl mb-3 sm:mb-4">Join the Terminal</h2>
+              <p className="text-gray-400 terminal-text mb-4 sm:mb-6 text-sm sm:text-base">
                 {'>'} Authenticate to access confessions and live chat
               </p>
-              <Link to="/auth" className="terminal-button inline-block px-8 py-3">
+              <Link to="/auth" className="terminal-button inline-block px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base">
                 /authenticate
               </Link>
             </div>

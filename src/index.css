@@ -132,6 +132,22 @@
     pointer-events: none;
     animation: scanlines 3s linear infinite;
   }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer components {
@@ -144,10 +160,21 @@
   }
   
   .terminal-input {
-    @apply bg-black border border-gray-600 text-white font-mono px-3 py-2 focus:border-white focus:outline-none;
+    @apply bg-black border border-gray-600 text-white font-mono px-3 py-2 focus:border-white focus:outline-none text-sm sm:text-base;
   }
   
   .terminal-button {
-    @apply bg-transparent border border-white text-white font-mono px-4 py-2 hover:bg-white hover:text-black transition-colors duration-200;
+    @apply bg-transparent border border-white text-white font-mono px-4 py-2 hover:bg-white hover:text-black transition-colors duration-200 text-sm sm:text-base;
+  }
+
+  /* Mobile-specific styles */
+  @media (max-width: 640px) {
+    .terminal-text {
+      @apply text-sm leading-normal;
+    }
+    
+    .terminal-border {
+      @apply rounded-none;
+    }
   }
 }
