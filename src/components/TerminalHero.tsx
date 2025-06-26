@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Brain, MessageSquare, Heart, Users } from 'lucide-react';
 
 const TerminalHero = () => {
   const [currentLine, setCurrentLine] = useState(0);
@@ -58,22 +59,34 @@ const TerminalHero = () => {
             <div className="space-y-4 animate-fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-8 sm:mt-12">
                 <Link to="/degen-shrink" className="terminal-button p-4 sm:p-6 text-left hover:animate-glitch block">
-                  <div className="text-base sm:text-xl mb-1 sm:mb-2">/degen_shrink</div>
+                  <div className="flex items-center text-base sm:text-xl mb-1 sm:mb-2">
+                    <Brain className="w-5 h-5 mr-2" />
+                    /degen_shrink
+                  </div>
                   <div className="text-gray-400 text-xs sm:text-sm">AI therapist for crypto PTSD</div>
                 </Link>
                 
                 <Link to="/confessions" className="terminal-button p-4 sm:p-6 text-left hover:animate-glitch block">
-                  <div className="text-base sm:text-xl mb-1 sm:mb-2">/anonymous_confess</div>
+                  <div className="flex items-center text-base sm:text-xl mb-1 sm:mb-2">
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    /anonymous_confess
+                  </div>
                   <div className="text-gray-400 text-xs sm:text-sm">Vent your degen sins safely</div>
                 </Link>
                 
                 <Link to="/breathing" className="terminal-button p-4 sm:p-6 text-left hover:animate-glitch block">
-                  <div className="text-base sm:text-xl mb-1 sm:mb-2">/blackout_breathe</div>
+                  <div className="flex items-center text-base sm:text-xl mb-1 sm:mb-2">
+                    <Heart className="w-5 h-5 mr-2" />
+                    /blackout_breathe
+                  </div>
                   <div className="text-gray-400 text-xs sm:text-sm">Meditation for chart addicts</div>
                 </Link>
                 
                 <Link to="/chat" className="terminal-button p-4 sm:p-6 text-left hover:animate-glitch block">
-                  <div className="text-base sm:text-xl mb-1 sm:mb-2">/live_terminal</div>
+                  <div className="flex items-center text-base sm:text-xl mb-1 sm:mb-2">
+                    <Users className="w-5 h-5 mr-2" />
+                    /live_terminal
+                  </div>
                   <div className="text-gray-400 text-xs sm:text-sm">Anonymous degen chat</div>
                 </Link>
               </div>
