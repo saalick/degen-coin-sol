@@ -8,7 +8,7 @@ const TerminalHero = () => {
   const [displayedText, setDisplayedText] = useState<string[]>([]);
 
   const lines = [
-    '> Welcome to the Terminal.',
+    '> Welcome to the DegenCoin.',
     '> Mental Health for Crypto Degens.',
     '> No BS. No judgment. Just raw support.',
     '> Enter when ready...'
