@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   signUp: (email: string, password: string, username?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithWallet: (walletAddress: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -48,13 +49,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, username?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
+    // Remove email confirmation by not setting emailRedirectTo
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: {
           username: username || `anon_${Date.now()}`
         }
@@ -71,6 +70,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
+  const signInWithWallet = async (walletAddress: string) => {
+    try {
+      // Create a temporary email based on wallet address
+      const tempEmail = `${walletAddress.toLowerCase()}@wallet.temp`;
+      const tempPassword = walletAddress; // Use wallet address as password
+      
+      // Try to sign in first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: tempEmail,
+        password: tempPassword
+      });
+
+      if (signInError) {
+        // If signin fails, create new account
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: tempEmail,
+          password: tempPassword,
+          options: {
+            data: {
+              username: `wallet_${walletAddress.slice(0, 8)}`,
+              wallet_address: walletAddress
+            }
+          }
+        });
+        return { error: signUpError };
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -80,6 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     signUp,
     signIn,
+    signInWithWallet,
     signOut,
     loading
   };

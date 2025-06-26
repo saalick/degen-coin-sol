@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,7 +39,15 @@ const ConfessionFeed = () => {
 
       if (error) throw error;
 
-      setConfessions(data || []);
+      // Properly type and transform the reactions data
+      const transformedData = data?.map(confession => ({
+        ...confession,
+        reactions: typeof confession.reactions === 'object' && confession.reactions !== null
+          ? confession.reactions as { cope: number; same: number; gm: number }
+          : { cope: 0, same: 0, gm: 0 }
+      })) || [];
+
+      setConfessions(transformedData);
     } catch (error: any) {
       toast({
         title: "Error loading confessions",
