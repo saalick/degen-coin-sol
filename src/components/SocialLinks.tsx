@@ -5,7 +5,7 @@ const SocialLinks = () => {
   return (
     <div className="flex justify-center space-x-8 mb-8">
       <a 
-        href="https://instagram.com" 
+        href="https://ig.me/j/Abae0X_HVsJv3Hg0/" 
         target="_blank" 
         rel="noopener noreferrer"
         className="terminal-button p-4 flex items-center space-x-2 hover:animate-glitch"
@@ -14,7 +14,7 @@ const SocialLinks = () => {
         <span>Instagram</span>
       </a>
       <a 
-        href="https://x.com" 
+        href="https://x.com/degencoinofsol" 
         target="_blank" 
         rel="noopener noreferrer"
         className="terminal-button p-4 flex items-center space-x-2 hover:animate-glitch"
@@ -23,7 +23,7 @@ const SocialLinks = () => {
         <span>X (Twitter)</span>
       </a>
       <a 
-        href="https://t.me" 
+        href="https://t.me/degencoinofsol" 
         target="_blank" 
         rel="noopener noreferrer"
         className="terminal-button p-4 flex items-center space-x-2 hover:animate-glitch"
