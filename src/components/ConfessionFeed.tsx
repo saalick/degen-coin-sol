@@ -63,7 +63,7 @@ const ConfessionFeed = () => {
         <div className="mb-8">
           <h2 className="terminal-text text-3xl mb-4">Anonymous Confessions</h2>
           <p className="text-gray-400 terminal-text">
-            > Raw degen stories. No judgment zone. Type /anon to stay hidden.
+            {'>'} Raw degen stories. No judgment zone. Type /anon to stay hidden.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ const ConfessionFeed = () => {
               </div>
               
               <div className="terminal-text text-gray-300 mb-4 leading-relaxed">
-                > {confession.text}
+                {'>'} {confession.text}
               </div>
               
               <div className="flex justify-between items-center">

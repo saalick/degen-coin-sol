@@ -101,7 +101,7 @@ const DegenShrink = () => {
                   [{message.timestamp.toLocaleTimeString()}] {message.isUser ? 'anon' : 'DegenShrink'}:
                 </div>
                 <div className={message.isUser ? 'text-gray-300' : 'text-white'}>
-                  > {message.text}
+                  {'>'} {message.text}
                 </div>
               </div>
             ))}

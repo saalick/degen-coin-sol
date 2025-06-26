@@ -48,7 +48,7 @@ const BreathingRoom = () => {
       <div className="text-center max-w-2xl w-full">
         <h2 className="terminal-text text-3xl mb-8">Blackout Breathing Room</h2>
         <p className="text-gray-400 terminal-text mb-12">
-          > For when the charts are too much. Breathe through the pain.
+          {'>'} For when the charts are too much. Breathe through the pain.
         </p>
 
         <div className="mb-12">
