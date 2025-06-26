@@ -1,9 +1,12 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const Navigation = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { path: '/', label: 'home' },
@@ -25,25 +28,51 @@ const Navigation = () => {
           />
         </Link>
         
-        <div className="flex space-x-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className="terminal-text hover:text-gray-300 transition-colors duration-200 relative"
-              onMouseEnter={() => setHoveredItem(item.label)}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <span className="text-gray-400">/</span>
-              <span 
-                className={hoveredItem === item.label ? 'animate-glitch' : ''}
-                data-text={item.label}
+        <div className="flex items-center space-x-6">
+          <div className="flex space-x-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="terminal-text hover:text-gray-300 transition-colors duration-200 relative"
+                onMouseEnter={() => setHoveredItem(item.label)}
+                onMouseLeave={() => setHoveredItem(null)}
               >
-                {item.label}
-              </span>
-              {hoveredItem === item.label && <span className="cursor"></span>}
-            </Link>
-          ))}
+                <span className="text-gray-400">/</span>
+                <span 
+                  className={hoveredItem === item.label ? 'animate-glitch' : ''}
+                  data-text={item.label}
+                >
+                  {item.label}
+                </span>
+                {hoveredItem === item.label && <span className="cursor"></span>}
+              </Link>
+            ))}
+          </div>
+          
+          <div className="border-l border-gray-600 pl-6">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="terminal-text text-gray-400 text-sm">
+                  /logged_in
+                </span>
+                <Button
+                  onClick={signOut}
+                  variant="outline"
+                  size="sm"
+                  className="terminal-button text-xs"
+                >
+                  /logout
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="terminal-button text-xs">
+                  /login
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </nav>
