@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'mono': ['IBM Plex Mono', 'monospace'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -84,11 +88,35 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'typing': {
+					'0%': { width: '0ch' },
+					'100%': { width: '100%' }
+				},
+				'blink': {
+					'0%, 50%': { opacity: '1' },
+					'51%, 100%': { opacity: '0' }
+				},
+				'glitch': {
+					'0%': { transform: 'translate(0)' },
+					'20%': { transform: 'translate(-2px, 2px)' },
+					'40%': { transform: 'translate(-2px, -2px)' },
+					'60%': { transform: 'translate(2px, 2px)' },
+					'80%': { transform: 'translate(2px, -2px)' },
+					'100%': { transform: 'translate(0)' }
+				},
+				'scanlines': {
+					'0%': { transform: 'translateY(-100%)' },
+					'100%': { transform: 'translateY(100vh)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'typing': 'typing 3s steps(40, end)',
+				'blink': 'blink 1s infinite',
+				'glitch': 'glitch 0.3s ease-in-out',
+				'scanlines': 'scanlines 3s linear infinite'
 			}
 		}
 	},
