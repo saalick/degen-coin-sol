@@ -24,7 +24,7 @@ const SocialLinks = () => {
           <span className="text-sm sm:text-base">X (Twitter)</span>
         </a>
         <a 
-          href="https://t.me/June26Launch2PmPst" 
+          href="https://t.me/degenportalsol" 
           target="_blank" 
           rel="noopener noreferrer"
           className="terminal-button p-3 sm:p-4 flex items-center justify-center space-x-2 hover:animate-glitch w-full sm:w-auto max-w-xs"
